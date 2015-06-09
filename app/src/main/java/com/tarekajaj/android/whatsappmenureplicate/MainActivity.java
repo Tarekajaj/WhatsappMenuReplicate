@@ -14,6 +14,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
+
+    private View theMenu;
     private View menu1;
     private View menu2;
     private View menu3;
@@ -29,6 +31,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        theMenu = findViewById(R.id.the_menu);
         menu1 = findViewById(R.id.menu1);
         menu2 = findViewById(R.id.menu2);
         menu3 = findViewById(R.id.menu3);
@@ -43,25 +46,17 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_languages) {
 
             if (!menuOpen) {
-                try {
-                    revealMenu();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                revealMenu();
             } else {
                 hideMenu();
             }
@@ -69,22 +64,23 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void revealMenu() throws InterruptedException {
+    public void revealMenu() {
         menuOpen = true;
 
-        View myView = findViewById(R.id.lnaguagesMenu);
-        myView.setVisibility(View.INVISIBLE);
-        int cx = myView.getRight() - 200;
-        int cy = myView.getTop();
-        int finalRadius = Math.max(myView.getWidth(), myView.getHeight());
+        theMenu.setVisibility(View.INVISIBLE);
+        int cx = theMenu.getRight() - 200;
+        int cy = theMenu.getTop();
+        int finalRadius = Math.max(theMenu.getWidth(), theMenu.getHeight());
         Animator anim =
-                ViewAnimationUtils.createCircularReveal(myView, cx, cy, 0, finalRadius);
+                ViewAnimationUtils.createCircularReveal(theMenu, cx, cy, 0, finalRadius);
         anim.setDuration(600);
-        myView.setVisibility(View.VISIBLE);
+        theMenu.setVisibility(View.VISIBLE);
         overlay.setVisibility(View.VISIBLE);
         anim.start();
 
 
+        // Animate The Icons One after the other, I really would like to know if there is any
+        // simpler way to do it
         Animation popeup1 = AnimationUtils.loadAnimation(this, R.anim.popeup);
         Animation popeup2 = AnimationUtils.loadAnimation(this, R.anim.popeup);
         Animation popeup3 = AnimationUtils.loadAnimation(this, R.anim.popeup);
@@ -108,18 +104,16 @@ public class MainActivity extends ActionBarActivity {
 
     public void hideMenu() {
         menuOpen = false;
-        final View myView = findViewById(R.id.lnaguagesMenu);
-        int cx = myView.getRight() - 200;
-        int cy = myView.getTop();
-        int initialRadius = myView.getWidth();
-        Animator anim =
-                ViewAnimationUtils.createCircularReveal(myView, cx, cy, initialRadius, 0);
+        int cx = theMenu.getRight() - 200;
+        int cy = theMenu.getTop();
+        int initialRadius = theMenu.getWidth();
+        Animator anim = ViewAnimationUtils.createCircularReveal(theMenu, cx, cy, initialRadius, 0);
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                myView.setVisibility(View.INVISIBLE);
-                myView.setVisibility(View.GONE);
+                theMenu.setVisibility(View.INVISIBLE);
+                theMenu.setVisibility(View.GONE);
                 overlay.setVisibility(View.INVISIBLE);
                 overlay.setVisibility(View.GONE);
             }
@@ -129,15 +123,11 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public void onBackPressed() {
-        if(menuOpen){
+        if (menuOpen) {
             hideMenu();
         } else {
             finishAfterTransition();
         }
-    }
-
-    public void back(View view) {
-        finishAfterTransition();
     }
 
     public void overlayClick(View v) {
@@ -146,6 +136,6 @@ public class MainActivity extends ActionBarActivity {
 
     public void menuClick(View view) {
         hideMenu();
-        Toast.makeText(this, "Menu Item Clicked", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, view.getTag() + " Clicked", Toast.LENGTH_LONG).show();
     }
 }
